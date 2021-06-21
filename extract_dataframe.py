@@ -42,7 +42,7 @@ class TweetDfExtractor:
 
     def find_full_text(self) -> list:
         text = [x['retweeted_status']['extended_tweet']['full_text'] for x in self.tweets_list]
-        return self.tweets_list
+        return text
 
     def find_sentiments(self, text) -> list:
         polarity = [TextBlob(x).polarity for x in text]
@@ -71,18 +71,17 @@ class TweetDfExtractor:
 
     def is_sensitive(self) -> list:
         try:
-            is_sensitive = [x['possibly_sensitive'] for x in self.tweets_list]
+            is_sensitive = [x['retweeted_status']['possibly_sensitive'] for x in self.tweets_list]
         except KeyError:
-            is_sensitive = None
-
+            is_sensitive = [None for x in self.tweets_list]
         return is_sensitive
 
     def find_favourite_count(self) -> list:
-        favourite_count = [x['user']['favourites_count'] for x in self.tweets_list]
+        favourite_count = [x['retweeted_status']['favorite_count'] for x in self.tweets_list]
         return favourite_count
 
     def find_retweet_count(self) -> list:
-        retweet_count = [x['user']['screen_name'] for x in self.tweets_list]
+        retweet_count = [x['retweeted_status']['retweet_count'] for x in self.tweets_list]
         return retweet_count
 
     def find_hashtags(self) -> list:
@@ -95,11 +94,15 @@ class TweetDfExtractor:
 
     def find_location(self) -> list:
         try:
-            location = self.tweets_list['user']['location']
+            location = [x['user']['location'] for x in self.tweets_list]
         except TypeError:
             location = ''
 
         return location
+
+    def find_lang(self) -> list:
+        lang = [x['lang'] for x in self.tweets_list]
+        return lang
 
     def get_tweet_df(self, save=False) -> pd.DataFrame:
         """required column to be generated you should be creative and add more features"""
