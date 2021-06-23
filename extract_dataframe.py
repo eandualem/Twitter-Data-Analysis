@@ -33,7 +33,6 @@ class TweetDfExtractor:
     """
 
     def __init__(self, tweets_list):
-
         self.tweets_list = tweets_list
 
     # an example function
@@ -79,17 +78,17 @@ class TweetDfExtractor:
         return friends_count
 
     def is_sensitive(self) -> list:
-        is_sensitive = [x.get('retweeted_status', None).get(
+        is_sensitive = [x.get('retweeted_status', {}).get(
             'possibly_sensitive', None) for x in self.tweets_list]
         return is_sensitive
 
     def find_favourite_count(self) -> list:
-        favourite_count = [x.get('retweeted_status', None).get(
+        favorite_count = [x.get('retweeted_status', {}).get(
             'favorite_count', 0) for x in self.tweets_list]
-        return favourite_count
+        return favorite_count
 
     def find_retweet_count(self) -> list:
-        retweet_count = [x.get('retweeted_status', None).get(
+        retweet_count = [x.get('retweeted_status', {}).get(
             'retweet_count', 0) for x in self.tweets_list]
         return retweet_count
 
@@ -102,7 +101,7 @@ class TweetDfExtractor:
         return mentions
 
     def find_location(self) -> list:
-        location = [x.get('user', None).get('location', None)
+        location = [x.get('user', {}).get('location', None)
                     for x in self.tweets_list]
         return location
 

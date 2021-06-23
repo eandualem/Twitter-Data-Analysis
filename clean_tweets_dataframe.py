@@ -23,7 +23,7 @@ class Clean_Tweets:
         """
         drop duplicate rows
         """
-        df = df.drop_duplicates(inplace=True)
+        df.drop_duplicates(inplace=True)
   
         return df
         
