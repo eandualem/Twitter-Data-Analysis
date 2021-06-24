@@ -1,4 +1,5 @@
 import json
+from numpy import append
 import pandas as pd
 from textblob import TextBlob
 
@@ -32,18 +33,22 @@ class TweetDfExtractor:
     """
 
     def __init__(self, tweets_list):
-
         self.tweets_list = tweets_list
 
     # an example function
     def find_statuses_count(self) -> list:
-        statuses_count = [x['user']['statuses_count'] for x in self.tweets_list]
+        statuses_count = [x['user']['statuses_count']
+                          for x in self.tweets_list]
         return statuses_count
 
     def find_full_text(self) -> list:
-        try: text = [x['retweeted_status']['extended_tweet']['full_text'] for x in self.tweets_list]
-        except KeyError:
-            text = [x['text'] for x in self.tweets_list]
+        text = []
+        for x in self.tweets_list:
+            try:
+                text.append(x['retweeted_status']
+                            ['extended_tweet']['full_text'])
+            except KeyError:
+                text.append(x['text'])
         return text
 
     def find_sentiments(self, text) -> list:
@@ -64,7 +69,8 @@ class TweetDfExtractor:
         return screen_name
 
     def find_followers_count(self) -> list:
-        followers_count = [x['user']['followers_count'] for x in self.tweets_list]
+        followers_count = [x['user']['followers_count']
+                           for x in self.tweets_list]
         return followers_count
 
     def find_friends_count(self) -> list:
@@ -72,22 +78,18 @@ class TweetDfExtractor:
         return friends_count
 
     def is_sensitive(self) -> list:
-        try:
-            is_sensitive = [x['retweeted_status']['possibly_sensitive'] for x in self.tweets_list]
-        except KeyError:
-            is_sensitive = [None for x in self.tweets_list]
+        is_sensitive = [x.get('retweeted_status', {}).get(
+            'possibly_sensitive', None) for x in self.tweets_list]
         return is_sensitive
 
     def find_favourite_count(self) -> list:
-        try: favourite_count = [x['retweeted_status']['favorite_count'] for x in self.tweets_list]
-        except KeyError:
-            favourite_count = [None for x in self.tweets_list]
-        return favourite_count
+        favorite_count = [x.get('retweeted_status', {}).get(
+            'favorite_count', 0) for x in self.tweets_list]
+        return favorite_count
 
     def find_retweet_count(self) -> list:
-        try: retweet_count = [x['retweeted_status']['retweet_count'] for x in self.tweets_list]
-        except KeyError:
-            retweet_count = [None for x in self.tweets_list]
+        retweet_count = [x.get('retweeted_status', {}).get(
+            'retweet_count', 0) for x in self.tweets_list]
         return retweet_count
 
     def find_hashtags(self) -> list:
@@ -99,11 +101,8 @@ class TweetDfExtractor:
         return mentions
 
     def find_location(self) -> list:
-        try:
-            location = [x['user']['location'] for x in self.tweets_list]
-        except TypeError:
-            location = ''
-
+        location = [x.get('user', {}).get('location', None)
+                    for x in self.tweets_list]
         return location
 
     def find_lang(self) -> list:
