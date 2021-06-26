@@ -82,8 +82,8 @@ def selectByPolarity():
     else:
         return QueryByPolarity('polarity=0 Order by ' + filt)
 
-st.write(selectByPolarity())
 
+st.write(selectByPolarity())
 
 
 header("Visualization")
@@ -92,19 +92,22 @@ header("Visualization")
    with select number of elements
 """
 
-num = st.slider("Number of elements ", 1, 20, 5)
+
+def selectColumn(df):
+    column = st.sidebar.selectbox(
+        "Select column from", (["original_author", "hashtags", "favorite_count"]))
+
+    dfCount = pd.DataFrame({'Tweet_count': df.groupby(
+        [column])[column].count()}).reset_index()
+    dfCount[column] = dfCount[column].astype(str)
+    dfCount = dfCount.sort_values("Tweet_count", ascending=False)
+
+    num = st.slider("Select number of Rankings", 0, 50, 5)
+    title = f"Top {num} Ranking By Number of tweets"
+    barChart(dfCount.head(num), title, "original_author", "Tweet_count")
+
 df = loadData()
-dfCount = pd.DataFrame({'Tweet_count': df.groupby(['original_author'])[
-                       'original_text'].count()}).reset_index()
-
-
-dfCount["original_author"] = dfCount["original_author"].astype(str)
-dfCount = dfCount.sort_values("Tweet_count", ascending=False)
-
-num = st.slider("Select number of Rankings", 0, 50, 5)
-title = f"Top {num} Ranking By Number of tweets"
-barChart(dfCount.head(num), title, "original_author", "Tweet_count")
-
+selectColumn(df)
 # fig = ff.create_distplot([df['original_author'].head(num)], [
 #                          "love"])
 # st.plotly_chart(fig, use_container_width=True)
