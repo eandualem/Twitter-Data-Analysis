@@ -8,11 +8,11 @@ import plotly.express as px
 from add_data import db_execute_fetch
 import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
+from streamlit_helper import *
 
 st.set_page_config(page_title="Day 5", layout="wide")
 
-st.title("Database")
-
+header("Database")
 """
 1. Here I have loaded the whole data from the database and 
 Filtered the data using pandas.
@@ -82,11 +82,15 @@ def selectByPolarity():
     else:
         return QueryByPolarity('polarity=0 Order by ' + filt)
 
-
 st.write(selectByPolarity())
 
-st.sidebar.title("Visualization")
 
+
+header("Visualization")
+"""
+3. Here I have created a bar chart for a selected column,
+   with select number of elements
+"""
 
 num = st.slider("Number of elements ", 1, 20, 5)
 df = loadData()
