@@ -1,3 +1,4 @@
+from os import write
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -8,6 +9,8 @@ from add_data import db_execute_fetch
 
 st.set_page_config(page_title="Day 5", layout="wide")
 
+st.title("Database")
+
 
 def loadData():
     query = "select * from TweetInformation"
@@ -15,97 +18,51 @@ def loadData():
     return df
 
 
-def selectHashTag():
-    df = loadData()
-    hashTags = st.multiselect(
-        "choose combaniation of hashtags", list(df['hashtags'].unique()))
-    if hashTags:
-        df = df[np.isin(df, hashTags).any(axis=1)]
-        st.write(df)
+def hashtag(df):
+    hashtag = st.sidebar.multiselect(
+        "Hashtag column", list(df['hashtags'].unique()))
+
+    return hashtag
 
 
-def selectLocAndAuth():
-    df = loadData()
-    location = st.multiselect("choose Location of tweets", list(
-        df['place_coordinate'].unique()))
-    lang = st.multiselect("choose Language of tweets",
-                          list(df['language'].unique()))
+def hashtagInTweets(df):
+    hashtag = st.sidebar.multiselect(
+        "Hashtags in tweets", list(df['hashtags_in_tweets'].unique()))
 
-    if location and not lang:
-        df = df[np.isin(df, location).any(axis=1)]
-        st.write(df)
-    elif lang and not location:
-        df = df[np.isin(df, lang).any(axis=1)]
-        st.write(df)
-    elif lang and location:
-        location.extend(lang)
-        df = df[np.isin(df, location).any(axis=1)]
-        st.write(df)
+    return hashtag
+
+
+def selectHashTag(df):
+    hashTags = st.sidebar.selectbox(
+        "Select Hashtag from", (["Hashtag Column", "Hashtags in tweet"]))
+    if hashTags == "Hashtag Column":
+        return hashtag(df)
     else:
-        st.write(df)
+        return hashtagInTweets(df)
 
 
-def barChart(data, title, X, Y):
-    title = title.title()
-    st.title(f'{title} Chart')
-    msgChart = (alt.Chart(data).mark_bar().encode(alt.X(f"{X}:N", sort=alt.EncodingSortField(field=f"{Y}", op="values",
-                order='ascending')), y=f"{Y}:Q"))
-    st.altair_chart(msgChart, use_container_width=True)
+df = loadData()
+hashtag = selectHashTag(df)
+temp_df = df[np.isin(df, hashtag).any(axis=1)]
+st.write(temp_df)
 
 
-def wordCloud():
-    df = loadData()
-    cleanText = ''
-    for text in df['original_text']:
-        tokens = str(text).lower().split()
-
-        cleanText += " ".join(tokens) + " "
-
-    wc = WordCloud(width=650, height=450, background_color='white',
-                   min_font_size=5).generate(cleanText)
-    st.title("Tweet Text Word Cloud")
-    st.image(wc.to_array())
+def QueryByPolarity(condition):
+    query = f"select favorite_count, followers_count, friends_count from TweetInformation where {condition}"
+    print(query)
+    df = db_execute_fetch(query, dbName="tweets", rdf=True)
+    return df
 
 
-def stBarChart():
-    df = loadData()
-    dfCount = pd.DataFrame({'Tweet_count': df.groupby(['original_author'])[
-                           'clean_text'].count()}).reset_index()
-    dfCount["original_author"] = dfCount["original_author"].astype(str)
-    dfCount = dfCount.sort_values("Tweet_count", ascending=False)
-
-    num = st.slider("Select number of Rankings", 0, 50, 5)
-    title = f"Top {num} Ranking By Number of tweets"
-    barChart(dfCount.head(num), title, "original_author", "Tweet_count")
-
-
-def langPie():
-    df = loadData()
-    dfLangCount = pd.DataFrame({'Tweet_count': df.groupby(
-        ['language'])['clean_text'].count()}).reset_index()
-    dfLangCount["language"] = dfLangCount["language"].astype(str)
-    dfLangCount = dfLangCount.sort_values("Tweet_count", ascending=False)
-    dfLangCount.loc[dfLangCount['Tweet_count']
-                    < 10, 'lang'] = 'Other languages'
-    st.title(" Tweets Language pie chart")
-    fig = px.pie(dfLangCount, values='Tweet_count',
-                 names='language', width=500, height=350)
-    fig.update_traces(textposition='inside', textinfo='percent+label')
-
-    colB1, colB2 = st.beta_columns([2.5, 1])
-
-    with colB1:
-        st.plotly_chart(fig)
-    with colB2:
-        st.write(dfLangCount)
+def selectByPolarity():
+    pol = st.sidebar.selectbox(
+        "Select Polarity", (["Positive", "Negative", "Neutral"]))
+    if pol == "Positive":
+        return QueryByPolarity('polarity>0')
+    elif pol == "Negative":
+        return QueryByPolarity('polarity<0')
+    else:
+        return QueryByPolarity('polarity=0')
 
 
-st.title("Data Display")
-selectHashTag()
-st.markdown("<p style='padding:10px; background-color:#000000;color:#00ECB9;font-size:16px;border-radius:10px;'>Section Break</p>", unsafe_allow_html=True)
-# selectLocAndAuth()
-st.title("Data Visualizations")
-wordCloud()
-with st.beta_expander("Show More Graphs"):
-    stBarChart()
-    langPie()
+st.write(selectByPolarity())
