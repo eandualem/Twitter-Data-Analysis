@@ -55,6 +55,7 @@ def QueryByPolarity(condition):
 
 
 def selectByPolarity():
+    filt = st.selectbox("Order", (["ASC", "DSC"]))
     pol = st.sidebar.selectbox(
         "Select Polarity", (["Positive", "Negative", "Neutral"]))
     if pol == "Positive":
