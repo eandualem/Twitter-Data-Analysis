@@ -6,6 +6,8 @@ import altair as alt
 from wordcloud import WordCloud
 import plotly.express as px
 from add_data import db_execute_fetch
+import matplotlib.pyplot as plt
+import plotly.figure_factory as ff
 
 st.set_page_config(page_title="Day 5", layout="wide")
 
@@ -15,6 +17,8 @@ st.title("Database")
 1. Here I have loaded the whole data from the database and 
 Filtered the data using pandas.
 """
+
+
 def loadData():
     query = "select * from TweetInformation"
     df = db_execute_fetch(query, dbName="tweets", rdf=True)
@@ -53,9 +57,10 @@ st.write(temp_df)
 2. Here I have written a query that selects specific data I want.
    This is good for example if the data is too large.
 """
+
+
 def QueryByPolarity(condition):
     query = f"select favorite_count, followers_count, friends_count from TweetInformation where {condition}"
-    print(query)
     df = db_execute_fetch(query, dbName="tweets", rdf=True)
     return df
 
@@ -80,6 +85,22 @@ def selectByPolarity():
 
 st.write(selectByPolarity())
 
+st.sidebar.title("Visualization")
 
-st.title("Visualization")
 
+num = st.slider("Number of elements ", 1, 20, 5)
+df = loadData()
+dfCount = pd.DataFrame({'Tweet_count': df.groupby(['original_author'])[
+                       'original_text'].count()}).reset_index()
+
+
+dfCount["original_author"] = dfCount["original_author"].astype(str)
+dfCount = dfCount.sort_values("Tweet_count", ascending=False)
+
+num = st.slider("Select number of Rankings", 0, 50, 5)
+title = f"Top {num} Ranking By Number of tweets"
+barChart(dfCount.head(num), title, "original_author", "Tweet_count")
+
+# fig = ff.create_distplot([df['original_author'].head(num)], [
+#                          "love"])
+# st.plotly_chart(fig, use_container_width=True)
