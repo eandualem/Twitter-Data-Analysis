@@ -55,15 +55,21 @@ def QueryByPolarity(condition):
 
 
 def selectByPolarity():
-    filt = st.selectbox("Order", (["ASC", "DSC"]))
     pol = st.sidebar.selectbox(
         "Select Polarity", (["Positive", "Negative", "Neutral"]))
+    filt = st.selectbox("Order By", ([
+        "favorite_count DESC",
+        "favorite_count ASC",
+        "followers_count DESC",
+        "followers_count ASC",
+        "friends_count DESC",
+        "friends_count ASC"]))
     if pol == "Positive":
-        return QueryByPolarity('polarity>0')
+        return QueryByPolarity('polarity>0 Order by ' + filt)
     elif pol == "Negative":
-        return QueryByPolarity('polarity<0')
+        return QueryByPolarity('polarity<0 Order by ' + filt)
     else:
-        return QueryByPolarity('polarity=0')
+        return QueryByPolarity('polarity=0 Order by ' + filt)
 
 
 st.write(selectByPolarity())
