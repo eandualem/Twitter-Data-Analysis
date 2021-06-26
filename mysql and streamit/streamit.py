@@ -11,7 +11,10 @@ st.set_page_config(page_title="Day 5", layout="wide")
 
 st.title("Database")
 
-
+"""
+1. Here I have loaded the whole data from the database and 
+Filtered the data using pandas.
+"""
 def loadData():
     query = "select * from TweetInformation"
     df = db_execute_fetch(query, dbName="tweets", rdf=True)
@@ -46,7 +49,10 @@ hashtag = selectHashTag(df)
 temp_df = df[np.isin(df, hashtag).any(axis=1)]
 st.write(temp_df)
 
-
+"""
+2. Here I have written a query that selects specific data I want.
+   This is good for example if the data is too large.
+"""
 def QueryByPolarity(condition):
     query = f"select favorite_count, followers_count, friends_count from TweetInformation where {condition}"
     print(query)
@@ -73,3 +79,7 @@ def selectByPolarity():
 
 
 st.write(selectByPolarity())
+
+
+st.title("Visualization")
+
