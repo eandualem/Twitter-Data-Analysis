@@ -36,3 +36,10 @@ def wordCloud():
                    min_font_size=5).generate(cleanText)
     st.title("Tweet Text Word Cloud")
     st.image(wc.to_array())
+
+
+def string_to_array(data):
+    if data == ' ':
+        return None
+    else:
+        return data.split(' ')

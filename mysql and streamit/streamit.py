@@ -93,18 +93,58 @@ header("Visualization")
 """
 
 
+def flatten(df, column):
+    df[column] = df[column].apply(string_to_array)
+    df.dropna(inplace=True)
+    df = pd.DataFrame(
+        [hashtag for hashtags_list in df.hashtags
+         for hashtag in hashtags_list],
+        columns=[column])
+
+    return df
+
+
 def selectColumn(df):
     column = st.sidebar.selectbox(
-        "Select column from", (["original_author", "hashtags", "favorite_count"]))
+        "Select column from", (["original_author",
+                                "hashtags",
+                                "hashtags_in_tweets",
+                                "favorite_count",
+                                "followers_count",
+                                "friends_count",
+                                "place", ]))
+
+    if(column == "hashtags" or column == "hashtags_in_tweets"):
+        df = flatten(df, column)
+        print(type(df))
 
     dfCount = pd.DataFrame({'Tweet_count': df.groupby(
         [column])[column].count()}).reset_index()
     dfCount[column] = dfCount[column].astype(str)
     dfCount = dfCount.sort_values("Tweet_count", ascending=False)
+    num = st.slider("Select number of Rankings", 0, 50, 5)
+    title = f"Top {num} Ranking By Number of tweets"
+    barChart(dfCount.head(num), title, column, "Tweet_count")
+
+
+def selectColumn2(df):
+    column = st.sidebar.selectbox(
+        "Select column from", (["original_author", "hashtags", "favorite_count"]))
+
+    dfCount = pd.DataFrame({'Tweet_count': df.groupby(
+        [column])[column].count()}).reset_index()
+
+    df['hashtags'] = df['hashtags'].apply(string_to_array)
+    df.dropna(inplace=True)
+
+    # print(dfCount.head(3))
+    # print(flattened_hashtags_df.value_counts().head(3))
 
     num = st.slider("Select number of Rankings", 0, 50, 5)
     title = f"Top {num} Ranking By Number of tweets"
-    barChart(dfCount.head(num), title, "original_author", "Tweet_count")
+    barChart(flattened_hashtags_df.value_counts().head(num), title,
+             "original_author", "Tweet_count")
+
 
 df = loadData()
 selectColumn(df)
