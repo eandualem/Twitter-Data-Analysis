@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import mysql.connector as mysql
 from mysql.connector import Error
-from sqlalchemy import create_engine
 
 
 def DBConnect(dbName=None):
@@ -17,6 +16,9 @@ def DBConnect(dbName=None):
     -------
 
     """
+    # conn = mysql.connect(host='localhost', user='root', password=os.getenv('mysqlPass'),
+    #                      database=dbName, buffered=True)
+
     conn = mysql.connect(host='localhost', user='root', password='root',
                          database=dbName, buffered=True)
     cur = conn.cursor()
@@ -28,16 +30,6 @@ def emojiDB(dbName: str) -> None:
     dbQuery = f"ALTER DATABASE {dbName} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;"
     cur.execute(dbQuery)
     conn.commit()
-
-
-def test(dbName: str, df: pd.DataFrame) -> None:
-    engine = create_engine("mysql://root:root@localhost/tweets")
-    con = engine.connect()
-    df.to_sql(name='new_table3', con=con, if_exists='append')
-    con.close()
-    # dbQuery = f"ALTER DATABASE {dbName} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;"
-    # cur.execute(dbQuery)
-    # conn.commit()
 
 
 def createDB(dbName: str) -> None:
@@ -85,7 +77,6 @@ def createTables(dbName: str) -> None:
     fd.close()
 
     sqlCommands = readSqlFile.split(';')
-
     for command in sqlCommands:
         try:
             res = cur.execute(command)
@@ -98,31 +89,31 @@ def createTables(dbName: str) -> None:
     return
 
 
-def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
-    """
+# def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
+#     """
 
-    Parameters
-    ----------
-    df :
-        pd.DataFrame:
-    df :
-        pd.DataFrame:
-    df:pd.DataFrame :
+#     Parameters
+#     ----------
+#     df :
+#         pd.DataFrame:
+#     df :
+#         pd.DataFrame:
+#     df:pd.DataFrame :
 
 
-    Returns
-    -------
+#     Returns
+#     -------
 
-    """
-    cols_2_drop = ['Unnamed: 0', 'timestamp', 'sentiment',
-                   'possibly_sensitive', 'original_text']
-    try:
-        df = df.drop(columns=cols_2_drop, axis=1)
-        df = df.fillna(0)
-    except KeyError as e:
-        print("Error:", e)
+#     """
+#     cols_2_drop = ['Unnamed: 0', 'timestamp', 'sentiment',
+#                    'possibly_sensitive', 'original_text']
+#     try:
+#         df = df.drop(columns=cols_2_drop, axis=1)
+#         df = df.fillna(0)
+#     except KeyError as e:
+#         print("Error:", e)
 
-    return df
+#     return df
 
 
 def insert_to_tweet_table(dbName: str, df: pd.DataFrame, table_name: str) -> None:
@@ -155,12 +146,12 @@ def insert_to_tweet_table(dbName: str, df: pd.DataFrame, table_name: str) -> Non
     """
     conn, cur = DBConnect(dbName)
 
-    df = preprocess_df(df)
+    # df = preprocess_df(df)
 
     for _, row in df.iterrows():
         sqlQuery = f"""INSERT INTO {table_name} (created_at, source, original_text, polarity, subjectivity, lang,
-                    favorite_count, retweet_count, original_author, followers_count, friends_count, possibly_sensitive,
-                    hashtags, user_mentions, place)
+                    favorite_count, retweet_count, original_author, followers_count, friends_count,
+                    possibly_sensitive, hashtags, user_mentions, place)
              VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         data = (row[0], row[1], row[2], row[3], (row[4]), (row[5]), row[6], row[7], row[8], row[9], row[10], row[11],
                 row[12], row[13], row[14])
@@ -225,21 +216,13 @@ def db_execute_fetch(*args, many=False, tablename='', rdf=True, **kwargs) -> pd.
 
 
 if __name__ == "__main__":
-    print("1")
     createDB(dbName='tweets')
-    print("2")
-
     emojiDB(dbName='tweets')
-    print("3")
-
     createTables(dbName='tweets')
-    print("4")
 
     df = pd.read_csv('../notebooks/clean_tweets.csv')
-    print("5")
-    # test(dbName='tweets', df=df)
+
+    print(df.info())
 
     insert_to_tweet_table(dbName='tweets', df=df,
-                          table_name='TweetsColumns')
-
-    print("5")
+                          table_name='TweetInformation')

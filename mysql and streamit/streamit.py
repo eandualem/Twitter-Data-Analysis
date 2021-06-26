@@ -56,7 +56,7 @@ def barChart(data, title, X, Y):
 def wordCloud():
     df = loadData()
     cleanText = ''
-    for text in df['clean_text']:
+    for text in df['original_text']:
         tokens = str(text).lower().split()
 
         cleanText += " ".join(tokens) + " "
@@ -103,7 +103,7 @@ def langPie():
 st.title("Data Display")
 selectHashTag()
 st.markdown("<p style='padding:10px; background-color:#000000;color:#00ECB9;font-size:16px;border-radius:10px;'>Section Break</p>", unsafe_allow_html=True)
-selectLocAndAuth()
+# selectLocAndAuth()
 st.title("Data Visualizations")
 wordCloud()
 with st.beta_expander("Show More Graphs"):
