@@ -146,9 +146,9 @@ def insert_to_tweet_table(dbName: str, df: pd.DataFrame, table_name: str) -> Non
     # df = preprocess_df(df)
 
     for _, row in df.iterrows():
-        sqlQuery = f"""INSERT INTO {table_name} (created_at, source, original_text, polarity, subjectivity, lang,
+        sqlQuery = f"""INSERT INTO {table_name} (created_at, original_text, polarity, subjectivity,
                     favorite_count, retweet_count, original_author, followers_count, friends_count,
-                    possibly_sensitive, hashtags, place, hashtags_in_tweets)
+                    possibly_sensitive, hashtags, place, hashtags_in_tweets, screen_name, device)
              VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
         data = (row[0], row[1], row[2], row[3], (row[4]), (row[5]), row[6], row[7], row[8], row[9], row[10], row[11],
                 row[12], row[13], row[14])

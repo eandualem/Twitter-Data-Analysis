@@ -2,11 +2,9 @@ CREATE TABLE IF NOT EXISTS `TweetInformation`
 (
     `id` INT NOT NULL AUTO_INCREMENT,
     `created_at` timestamp NOT NULL,
-    `source` VARCHAR(200) NOT NULL,
     `original_text` TEXT DEFAULT NULL,
     `polarity` DECIMAL DEFAULT NULL,
     `subjectivity` DOUBLE DEFAULT NULL,
-    `lang` TEXT DEFAULT NULL,
     `favorite_count` INT DEFAULT NULL,
     `retweet_count` INT DEFAULT NULL,
     `original_author` TEXT DEFAULT NULL,
@@ -16,6 +14,8 @@ CREATE TABLE IF NOT EXISTS `TweetInformation`
     `hashtags` TEXT DEFAULT NULL,
     `place` TEXT DEFAULT NULL,
     `hashtags_in_tweets` TEXT DEFAULT NULL,
+    `screen_name` TEXT DEFAULT NULL,
+    `device` TEXT DEFAULT NULL,
     PRIMARY KEY (`id`)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
