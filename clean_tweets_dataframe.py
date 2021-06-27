@@ -1,3 +1,5 @@
+import json
+import re
 import pandas as pd
 
 
@@ -5,10 +7,6 @@ class Clean_Tweets:
     """
     The PEP8 Standard AMAZING!!!
     """
-
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
-        print('Automation in Action...!!!')
 
     def drop_unwanted_column(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -27,6 +25,39 @@ class Clean_Tweets:
         """
         df.drop_duplicates(inplace=True)
 
+        return df
+
+    def remove_non_english_tweets(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        remove non english tweets from lang
+        """
+        df = df.drop(df[df['lang'] != 'en'].index)
+
+        return df
+
+    def remove_links(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        remove links starting with http, https or www
+        """
+        df['original_text'] = df.original_text.replace(
+            r'http\S+', '', regex=True).replace(r'www\S+', '', regex=True)
+
+        return df
+
+    def remove_special_characters(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        remove all characters except for [a-z, A-Z and #]
+        """
+        df = df.drop(df[df['lang'] != 'en'].index)
+        df['original_text'] = df['original_text'].str.replace(
+            "[^a-zA-Z#]", " ")
+        return df
+
+    def convert_to_string(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        convert columns like or original_text, subjectivity, retweet_count
+        favorite_count etc to string        """
+        df["original_text"] = df["original_text"].astype(str)
         return df
 
     def convert_to_datetime(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -50,10 +81,37 @@ class Clean_Tweets:
 
         return df
 
-    def remove_non_english_tweets(self, df: pd.DataFrame) -> pd.DataFrame:
+    def convert_to_boolean(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        remove non english tweets from lang
+        converts possibly_sensitive to boolean
         """
-        df = df.drop(df[df['lang'] != 'en'].index)
-
+        df["possibly_sensitive"] = df["possibly_sensitive"].astype(
+            'bool')
         return df
+
+    def read_text_from_json(json_data):
+        """
+        takes hashtags in object and them 
+        """
+        res = json.loads(json_data.replace("'", "\""))
+        hashtags = []
+        for i in range(len(res)):
+            hashtags.append("#"+res[0]["text"])
+
+        return hashtags
+
+    def array_to_string(data):
+        """
+        converts an array of into strings separated by space
+        """
+        if len(data) == 0:
+            return " "
+        else:
+            def res(x): return ' '.join([str(elem) for elem in x])
+            return res(data)
+
+    def find_hashtags(tweet):
+        """
+        finds hashtags in a give text
+        """
+        return re.findall('(#[A-Za-z]+[A-Za-z0-9-_]+)', str(tweet))
