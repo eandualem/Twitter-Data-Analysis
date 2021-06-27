@@ -154,7 +154,7 @@ class Clean_Tweets:
         df["screen_name"] = df["screen_name"].str.lower()
         return df
 
-    def text_category(self, p):
+    def polarity_category(self, p):
         """
         converst polarity to 3 group from floating value
         """
@@ -165,9 +165,22 @@ class Clean_Tweets:
         else:
             return "neutral"
 
+    def subjectivity_category(self, p):
+        """
+        converst polarity to 3 group from floating value
+        """
+        if p > 0.75:
+            return "very subjective"
+        elif p > 5:
+            return "subjective"
+        elif p >.25:
+            return "objective"
+        else:
+            return "very objective"
+
     def get_flattened_dataframe(self, df, flatten_column, preserve_column):
         """
-        Flattens column containing array with on additional colum
+        Flattens column containing array with one additional colum
         """
         new_flatten_column = []
         new_preserve_column = []
