@@ -153,3 +153,28 @@ class Clean_Tweets:
         df["hashtags_in_tweets"] = df["hashtags_in_tweets"].str.lower()
         df["screen_name"] = df["screen_name"].str.lower()
         return df
+
+    def text_category(self, p):
+        """
+        converst polarity to 3 group from floating value
+        """
+        if p > 0:
+            return "positive"
+        elif p < 0:
+            return "negative"
+        else:
+            return "neutral"
+
+    def get_flattened_dataframe(self, df, flatten_column, preserve_column):
+        """
+        Flattens column containing array with on additional colum
+        """
+        new_flatten_column = []
+        new_preserve_column = []
+        for index, row in df.iterrows():
+            for element in row[flatten_column]:
+                new_flatten_column.append(element)
+                new_preserve_column.append(row[preserve_column])
+
+        data = zip(new_flatten_column, new_preserve_column)
+        return pd.DataFrame(data=data, columns=[flatten_column, preserve_column])
