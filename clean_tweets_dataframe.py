@@ -57,7 +57,7 @@ class Clean_Tweets:
         """
         convert columns source, original_text, original_author, place, hashtags, 
         hashtags_in_tweets and screen_name to string        """
-        df["source"] = df["source"].astype("string")
+        df["device"] = df["device"].astype("string")
         df["original_text"] = df["original_text"].astype("string")
         df["original_author"] = df["original_author"].astype("string")
         df["place"] = df["place"].astype("string")
@@ -109,6 +109,13 @@ class Clean_Tweets:
         except:
             return hashtags
 
+    def get_device_name(self, data):
+        """
+        returns specific element value from json file in list
+        """
+        res = re.split('<|>', data)[2].strip()
+        return res
+
     def array_to_string(self, data):
         """
         converts an array of into strings separated by commas
@@ -138,7 +145,7 @@ class Clean_Tweets:
         """
         convert columns source, original_text, original_author, place, hashtags, 
         hashtags_in_tweets and screen_name to string        """
-        df["source"] = df["source"].str.lower()
+        df["device"] = df["device"].str.lower()
         df["original_text"] = df["original_text"].str.lower()
         df["original_author"] = df["original_author"].str.lower()
         df["place"] = df["place"].str.lower()
