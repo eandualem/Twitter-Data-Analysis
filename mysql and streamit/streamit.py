@@ -150,7 +150,8 @@ def wordCloud(df):
         tokens = text.split()
         cleanText += " ".join(tokens) + " "
 
-    custom_stopwords = ['t', 'rt', 'ti', 'vk', 'to', 'co', 'dqlw', 'z', 'nd', 'm', 's', 'kur', 'u', 'o', 'd']
+    custom_stopwords = ['t', 'rt', 'ti', 'vk', 'to', 'co',
+                        'dqlw', 'z', 'nd', 'm', 's', 'kur', 'u', 'o', 'd']
     STOP_WORDS = STOPWORDS.union(custom_stopwords)
 
     wc = WordCloud(width=1000, height=600, background_color='white', stopwords=STOP_WORDS).generate(
@@ -160,3 +161,76 @@ def wordCloud(df):
 
 df = loadData()
 wordCloud(df)
+
+
+"""
+5. **Tweet Text Word Cloud** \n
+   Here I have created world cloud for, positive, negative, neutral tweets,
+   and all tweets
+"""
+
+# Read in the cereal data
+df = loadData()
+
+st.title('Rating exploration')
+
+# Only a subset of options make sense
+x_options = [
+    'calories', 'protein', 'fat', 'sodium', 'fiber', 'carbo', 'sugars',
+    'potass'
+]
+
+# Allow use to choose
+x_axis = st.sidebar.selectbox('Which value do you want to explore?', x_options)
+
+# plot the value
+fig = px.scatter(df,
+                 x='place',
+                 y='favorite_count',
+                 title=f'Cereal ratings vs. {x_axis}')
+
+st.plotly_chart(fig)
+
+
+"""
+5. **Tweet Text Word Cloud** \n
+   Here I have created world cloud for, positive, negative, neutral tweets,
+   and all tweets
+"""
+
+# Read in the cereal data
+df = loadData()
+
+st.title('Rating exploration')
+
+# plot the value
+fig = px.scatter_matrix(df, dimensions=[
+    "favorite_count",
+    "followers_count",
+    "friends_count",
+],  color="polarity")
+
+st.plotly_chart(fig)
+
+
+"""
+5. **Tweet Text Word Cloud** \n
+   Here I have created world cloud for, positive, negative, neutral tweets,
+   and all tweets
+"""
+
+# Read in the cereal data
+df = loadData()
+color = df["subjectivity"]
+df = df[["favorite_count", "followers_count",
+         "friends_count", "retweet_count"]]
+
+df = df.transform(lambda x: (x-min(x))/(max(x)-min(x)))
+
+df['color'] = color
+
+# plot the value
+fig = px.parallel_coordinates(
+    df, color="color", color_continuous_scale=px.colors.diverging.Tealrose, color_continuous_midpoint=0)
+
+st.plotly_chart(fig)

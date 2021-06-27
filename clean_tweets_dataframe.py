@@ -111,7 +111,7 @@ class Clean_Tweets:
 
     def array_to_string(self, data):
         """
-        converts an array of into strings separated by comma
+        converts an array of into strings separated by commas
         """
         if len(data) == 0:
             return " "
@@ -119,8 +119,30 @@ class Clean_Tweets:
             def res(x): return ', '.join([str(elem) for elem in x])
             return res(data)
 
+    def string_to_array(self, data):
+        """
+        does the opposite of array_to_string
+        """
+        if data == ' ':
+            return None
+        else:
+            return data.split(', ')
+
     def find_hashtags(self, tweet):
         """
         finds hashtags in a give text
         """
         return re.findall('(#[A-Za-z]+[A-Za-z0-9-_]+)', str(tweet))
+
+    def to_lower(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        convert columns source, original_text, original_author, place, hashtags, 
+        hashtags_in_tweets and screen_name to string        """
+        df["source"] = df["source"].str.lower()
+        df["original_text"] = df["original_text"].str.lower()
+        df["original_author"] = df["original_author"].str.lower()
+        df["place"] = df["place"].str.lower()
+        df["hashtags"] = df["hashtags"].str.lower()
+        df["hashtags_in_tweets"] = df["hashtags_in_tweets"].str.lower()
+        df["screen_name"] = df["screen_name"].str.lower()
+        return df
