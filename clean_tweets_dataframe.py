@@ -1,6 +1,7 @@
 import json
 import re
 import pandas as pd
+from streamlit.errors import Error
 
 
 class Clean_Tweets:
@@ -48,16 +49,21 @@ class Clean_Tweets:
         """
         remove all characters except for [a-z, A-Z and #]
         """
-        df = df.drop(df[df['lang'] != 'en'].index)
         df['original_text'] = df['original_text'].str.replace(
             "[^a-zA-Z#]", " ")
         return df
 
     def convert_to_string(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        convert columns like or original_text, subjectivity, retweet_count
-        favorite_count etc to string        """
-        df["original_text"] = df["original_text"].astype(str)
+        convert columns source, original_text, original_author, place, hashtags, 
+        hashtags_in_tweets and screen_name to string        """
+        df["source"] = df["source"].astype("string")
+        df["original_text"] = df["original_text"].astype("string")
+        df["original_author"] = df["original_author"].astype("string")
+        df["place"] = df["place"].astype("string")
+        df["hashtags"] = df["hashtags"].astype("string")
+        df["hashtags_in_tweets"] = df["hashtags_in_tweets"].astype("string")
+        df["screen_name"] = df["screen_name"].astype("string")
         return df
 
     def convert_to_datetime(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -89,28 +95,31 @@ class Clean_Tweets:
             'bool')
         return df
 
-    def read_text_from_json(json_data):
+    def get_element_from_json(self, json_data, key, append):
         """
-        takes hashtags in object and them 
+        returns specific element value from json file in list
         """
-        res = json.loads(json_data.replace("'", "\""))
         hashtags = []
-        for i in range(len(res)):
-            hashtags.append("#"+res[0]["text"])
+        try:
+            res = json.loads(json_data.replace("'", "\""))
+            for i in range(len(res)):
+                hashtags.append(append+res[0][key])
 
-        return hashtags
+            return hashtags
+        except:
+            return hashtags
 
-    def array_to_string(data):
+    def array_to_string(self, data):
         """
-        converts an array of into strings separated by space
+        converts an array of into strings separated by comma
         """
         if len(data) == 0:
             return " "
         else:
-            def res(x): return ' '.join([str(elem) for elem in x])
+            def res(x): return ', '.join([str(elem) for elem in x])
             return res(data)
 
-    def find_hashtags(tweet):
+    def find_hashtags(self, tweet):
         """
         finds hashtags in a give text
         """
