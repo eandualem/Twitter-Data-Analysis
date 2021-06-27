@@ -14,8 +14,9 @@ st.set_page_config(page_title="Day 5", layout="wide")
 
 header("Database")
 """
-1. Here I have loaded the whole data from the database and 
-Filtered the data using pandas.
+   1. **Query all tweets in database** \n
+   Here I have loaded the whole data from the database and 
+   Filtered the data using pandas.
 """
 
 
@@ -54,8 +55,9 @@ temp_df = df[np.isin(df, hashtag).any(axis=1)]
 st.write(temp_df)
 
 """
-2. Here I have written a query that selects specific data I want.
-   This is good for example if the data is too large.
+   2. **Query specific data** \n
+   Here I have written a query that selects specific tweets based on condition. 
+   It is good when the data we load is too large to load at once.
 """
 
 
@@ -88,20 +90,10 @@ st.write(selectByPolarity())
 
 header("Visualization")
 """
-3. Here I have created a bar chart for a selected column,
+3. **Display barchart for selected column** \n
+   Here I have created a bar chart for a selected column,
    with select number of elements
 """
-
-
-def flatten(df, column):
-    df[column] = df[column].apply(string_to_array)
-    df.dropna(inplace=True)
-    df = pd.DataFrame(
-        [hashtag for hashtags_list in df.hashtags
-         for hashtag in hashtags_list],
-        columns=[column])
-
-    return df
 
 
 def selectColumn(df):
@@ -127,27 +119,40 @@ def selectColumn(df):
     barChart(dfCount.head(num), title, column, "Tweet_count")
 
 
-def selectColumn2(df):
-    column = st.sidebar.selectbox(
-        "Select column from", (["original_author", "hashtags", "favorite_count"]))
+df = loadData()
+selectColumn(df)
 
-    dfCount = pd.DataFrame({'Tweet_count': df.groupby(
-        [column])[column].count()}).reset_index()
+"""
+4. **Tweet Text Word Cloud** \n
+   Here I have created world cloud for, positive, negative, neutral tweets,
+   and all tweets
+"""
 
-    df['hashtags'] = df['hashtags'].apply(string_to_array)
-    df.dropna(inplace=True)
 
-    # print(dfCount.head(3))
-    # print(flattened_hashtags_df.value_counts().head(3))
+def wordCloud(df):
+    choice = st.sidebar.selectbox(
+        "Select polarit of tweets from", (["all tweets",
+                                           "positive",
+                                           "neutral",
+                                           "negative"]))
 
-    num = st.slider("Select number of Rankings", 0, 50, 5)
-    title = f"Top {num} Ranking By Number of tweets"
-    barChart(flattened_hashtags_df.value_counts().head(num), title,
-             "original_author", "Tweet_count")
+    if(choice == "all tweets"):
+        tweets_df = df['original_text']
+    else:
+        df["score"] = df["polarity"].apply(text_category)
+        df.groupby("score")["polarity"].count()
+        tweets_df = df[df['score'] == choice]['original_text']
+
+    cleanText = ''
+    for text in tweets_df:
+        tokens = str(text).lower().split()
+
+        cleanText += " ".join(tokens) + " "
+
+    wc = WordCloud(width=650, height=450, background_color='white',
+                   min_font_size=5).generate(cleanText)
+    st.image(wc.to_array())
 
 
 df = loadData()
-selectColumn(df)
-# fig = ff.create_distplot([df['original_author'].head(num)], [
-#                          "love"])
-# st.plotly_chart(fig, use_container_width=True)
+wordCloud(df)

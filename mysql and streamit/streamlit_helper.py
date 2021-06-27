@@ -43,3 +43,23 @@ def string_to_array(data):
         return None
     else:
         return data.split(' ')
+
+
+def flatten(df, column):
+    df[column] = df[column].apply(string_to_array)
+    df.dropna(inplace=True)
+    df = pd.DataFrame(
+        [hashtag for hashtags_list in df.hashtags
+         for hashtag in hashtags_list],
+        columns=[column])
+
+    return df
+
+
+def text_category(p):
+    if p > 0:
+        return "positive"
+    elif p < 0:
+        return "negative"
+    else:
+        return "neutral"
