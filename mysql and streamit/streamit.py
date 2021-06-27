@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import altair as alt
-from wordcloud import WordCloud
+from wordcloud import WordCloud, STOPWORDS
 import plotly.express as px
 from add_data import db_execute_fetch
 import matplotlib.pyplot as plt
@@ -108,7 +108,6 @@ def selectColumn(df):
 
     if(column == "hashtags" or column == "hashtags_in_tweets"):
         df = flatten(df, column)
-        print(type(df))
 
     dfCount = pd.DataFrame({'Tweet_count': df.groupby(
         [column])[column].count()}).reset_index()
@@ -136,6 +135,9 @@ def wordCloud(df):
                                            "neutral",
                                            "negative"]))
 
+    df['original_text'] = df['original_text'].astype(str)
+    df['original_text'] = df['original_text'].apply(lambda x: x.lower())
+
     if(choice == "all tweets"):
         tweets_df = df['original_text']
     else:
@@ -145,12 +147,14 @@ def wordCloud(df):
 
     cleanText = ''
     for text in tweets_df:
-        tokens = str(text).lower().split()
-
+        tokens = text.split()
         cleanText += " ".join(tokens) + " "
 
-    wc = WordCloud(width=650, height=450, background_color='white',
-                   min_font_size=5).generate(cleanText)
+    custom_stopwords = ['t', 'rt', 'ti', 'vk', 'to', 'co', 'dqlw', 'z', 'nd', 'm', 's', 'kur', 'u', 'o', 'd']
+    STOP_WORDS = STOPWORDS.union(custom_stopwords)
+
+    wc = WordCloud(width=1000, height=600, background_color='white', stopwords=STOP_WORDS).generate(
+        ' '.join(df.original_text.values))
     st.image(wc.to_array())
 
 

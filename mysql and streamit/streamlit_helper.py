@@ -17,8 +17,9 @@ def header(text):
 
 
 def barChart(data, title, X, Y):
-    title = title.title()
-    st.title(f'{title} Chart')
+    title = f'{title.title()} Chart'
+    st.write(title)
+
     msgChart = (alt.Chart(data).mark_bar().encode(alt.X(f"{X}:N", sort=alt.EncodingSortField(field=f"{Y}", op="values",
                 order='ascending')), y=f"{Y}:Q"))
     st.altair_chart(msgChart, use_container_width=True)
@@ -49,7 +50,7 @@ def flatten(df, column):
     df[column] = df[column].apply(string_to_array)
     df.dropna(inplace=True)
     df = pd.DataFrame(
-        [hashtag for hashtags_list in df.hashtags
+        [hashtag for hashtags_list in df[column]
          for hashtag in hashtags_list],
         columns=[column])
 
