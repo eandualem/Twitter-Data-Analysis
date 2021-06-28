@@ -19,3 +19,4 @@ cache:
 script:
   - cd tests/
     - python3 test_extract_dataframe.py
+    - python3 test_clean_tweets_dataframe.py
