@@ -68,9 +68,9 @@ def hashtagInTweets(df):
     return hashtag
 
 
-def selectHashTag(df):
+def select_column_for_filter(df):
     hashTags = st.sidebar.selectbox(
-        "Select Hashtag from", (["Place", "Device", "Screen Name", "Hashtags in tweet", "Hashtag Column"]))
+        "Select column from ", (["Place", "Device", "Screen Name", "Hashtags in tweet", "Hashtag Column"]))
     if hashTags == "Place":
         return place(df)
     elif hashTags == "Device":
@@ -84,14 +84,14 @@ def selectHashTag(df):
 
 
 df = loadData()
-hashtag = selectHashTag(df)
+hashtag = select_column_for_filter(df)
 temp_df = df[np.isin(df, hashtag).any(axis=1)]
 st.write(temp_df)
 
 """
    2. **Query specific data** \n
    Here I have written a query that selects specific tweets based on condition. 
-   It is good when the data we load is too large to load at once.
+   It is good if the data is too large to load at once.
 """
 
 
@@ -103,8 +103,8 @@ def QueryByPolarity(condition):
 
 def selectByPolarity():
     pol = st.sidebar.selectbox(
-        "Select Polarity", (["Positive", "Negative", "Neutral"]))
-    filt = st.selectbox("Order By", ([
+        "Select from polarity", (["Positive", "Negative", "Neutral"]))
+    filt = st.sidebar.selectbox("Order rows by", ([
         "favorite_count DESC",
         "favorite_count ASC",
         "followers_count DESC",
@@ -126,41 +126,21 @@ header("Visualization")
 """
 3. **Display barchart for selected column** \n
    Here I have created a bar chart for a selected column,
-   with select number of elements
+   it will split each bar based on their polarity or subjectivity
+   and show them in different colors.
 """
 
 
-def selectColumn2(df):
-    column = st.sidebar.selectbox(
-        "Select column from", (["original_author",
-                                "hashtag",
-                                "hashtags_in_tweets",
-                                "favorite_count",
-                                "followers_count",
-                                "friends_count",
-                                "place", ]))
-
-    if(column == "hashtags" or column == "hashtags_in_tweets"):
-        df = flatten(df, column)
-
-    dfCount = pd.DataFrame({'Tweet_count': df.groupby(
-        [column])[column].count()}).reset_index()
-    dfCount[column] = dfCount[column].astype(str)
-    dfCount = dfCount.sort_values("Tweet_count", ascending=False)
-    num = st.slider("Select number of Rankings", 0, 50, 5)
-    title = f"Top {num} Ranking By Number of tweets"
-    barChart(dfCount.head(num), title, column, "Tweet_count")
-
-
 def selectColumn(df):
-    column = st.sidebar.selectbox(
-        "Select column from", (["original_author",
-                                "hashtags",
-                                "hashtags_in_tweets",
-                                "favorite_count",
-                                "followers_count",
-                                "friends_count",
-                                "place", ]))
+    column = st.selectbox(
+        "Select a column for a barchart", (["original_author",
+                                            "screen_name",
+                                            "hashtags",
+                                            "hashtags_in_tweets",
+                                            "favorite_count",
+                                            "followers_count",
+                                            "friends_count",
+                                            "place", ]))
 
     if(column == "hashtags" or column == "hashtags_in_tweets"):
         df[column] = df[column].apply(ct.string_to_array)
@@ -172,7 +152,7 @@ def selectColumn(df):
     df = df.groupby([column, 'score']).size().reset_index(name='counts')
     fig = px.histogram(df.nlargest(num, "counts"),
                        x=column, y="counts", color="score", title=title)
-
+    fig.update_layout(width=1200, height=600)
     st.plotly_chart(fig)
 
 
@@ -186,12 +166,12 @@ selectColumn(df)
 """
 4. **Tweet Text Word Cloud** \n
    Here I have created world cloud for, positive, negative, neutral tweets,
-   and all tweets
+   or all tweets
 """
 
 
 def wordCloud(df):
-    choice = st.sidebar.selectbox(
+    choice = st.selectbox(
         "Select polarit of tweets from", (["all tweets",
                                            "positive",
                                            "neutral",
@@ -226,9 +206,9 @@ wordCloud(df)
 
 
 """
-5. **Tweet Text Word Cloud** \n
-   Here I have created world cloud for, positive, negative, neutral tweets,
-   and all tweets
+5. **Popularity of tweets** \n
+   Here we try to find if there is corelation between retweet_count, favorite_count,
+   followers_count, friends_count and polarity and subjectivity
 """
 
 
@@ -249,7 +229,7 @@ def pie(df, column):
     fig.update(layout_title_text=f'Tweet popularity vs their {column}')
 
     fig = go.Figure(fig)
-    fig.update_layout(showlegend=False)
+    fig.update_layout(width=900, height=600)
     st.plotly_chart(fig)
 
 
@@ -260,7 +240,7 @@ def corelation(df, column):
         "followers_count",
         "friends_count",
     ],  color=column)
-    fig.update_layout(showlegend=False)
+    fig.update_layout(width=1200, height=600)
     st.plotly_chart(fig)
 
 
@@ -271,7 +251,7 @@ def select_pie(df):
     if column == "polarity":
         return ([pie(df, "score"), corelation(df, "score")])
     else:
-        return ([pie(df, "score"), corelation(df, "subjectivity_score")])
+        return ([pie(df, "subjectivity_score"), corelation(df, "subjectivity_score")])
 
 
 df = loadData()
@@ -282,24 +262,51 @@ select_pie(df)
 
 
 """
-6. **Tweet Text Word Cloud** \n
-   Here I have created world cloud for, positive, negative, neutral tweets,
-   and all tweets
+6. **Polarity of tweets over time** \n
+   Here I try there is a trend over time in polarity and subjectivity of tweets and
+   and theme being liked
 """
+
+
+def scatter(df):
+    col1, col2, col3, col4 = st.beta_columns(4)
+    color = col1.selectbox("Select column for color", ([
+        "polarity",
+        "subjectivity", ]), key=5)
+    x = col2.selectbox("Select x axis", ([
+        "retweet_count",
+        "favorite_count",
+        "followers_count",
+        "friends_count", ]), key=6)
+
+    y = col3.selectbox("Select column for y-axis", ([
+        "retweet_count",
+        "favorite_count",
+        "followers_count",
+        "friends_count", ]), key=7)
+
+    z = col4.selectbox("Select column for size", ([
+        "retweet_count",
+        "favorite_count",
+        "followers_count",
+        "friends_count", ]), key=8)
+
+    fig = px.scatter(df, x=x, y=y,
+                     color=color, size=z)
+    fig.update_layout(width=900, height=600)
+    st.plotly_chart(fig)
+
 
 df = loadData()
 df["score"] = df["polarity"].apply(ct.polarity_category)
 df["subjectivity_score"] = df["subjectivity"].apply(
     ct.subjectivity_category)
-fig = px.scatter(df, x='created_at', y="favorite_count",
-                 color='score', size='retweet_count')
-st.plotly_chart(fig)
+scatter(df)
 
 
 """
-7. **Tweet Text Word Cloud** \n
-   Here I have created world cloud for, positive, negative, neutral tweets,
-   and all tweets
+7. **Parallel Categories Diagram** \n
+   Finally here I have created parallel categories diagram.
 """
 
 # Read in the cereal data
@@ -308,9 +315,10 @@ df["score"] = df["polarity"].apply(ct.polarity_category)
 df["subjectivity_score"] = df["subjectivity"].apply(
     ct.subjectivity_category)
 df = df.groupby(['device', 'place', 'score', "subjectivity_score", 'subjectivity', "favorite_count", "followers_count", "retweet_count"]
-                    ).size().reset_index(name='counts')
+                ).size().reset_index(name='counts')
 
 x = df.nlargest(25, "counts")
 fig = px.parallel_categories(x, dimensions=['device', 'place', "retweet_count", 'score', 'subjectivity_score'],
                              color="subjectivity", color_continuous_scale=px.colors.sequential.Inferno)
+fig.update_layout(width=900, height=600)
 st.plotly_chart(fig)
