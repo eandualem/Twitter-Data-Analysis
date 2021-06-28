@@ -1,5 +1,3 @@
-from clean_tweets_dataframe import *
-from os import write
 import sys
 import os
 import numpy as np
@@ -15,16 +13,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 sys.path.append(os.path.abspath(os.path.join('..')))
-
-st.set_page_config(page_title="Day 5", layout="wide")
-ct = Clean_Tweets()
-
-header("Database")
-"""
-   1. **Query all tweets in database** \n
-   Here I have loaded the whole data from the database and 
-   Filtered the data using pandas.
-"""
+from clean_tweets_dataframe import *
 
 
 def loadData():
@@ -83,18 +72,6 @@ def select_column_for_filter(df):
         return hashtagInTweets(df)
 
 
-df = loadData()
-hashtag = select_column_for_filter(df)
-temp_df = df[np.isin(df, hashtag).any(axis=1)]
-st.write(temp_df)
-
-"""
-   2. **Query specific data** \n
-   Here I have written a query that selects specific tweets based on condition. 
-   It is good if the data is too large to load at once.
-"""
-
-
 def QueryByPolarity(condition):
     query = f"select favorite_count, followers_count, friends_count from TweetInformation where {condition}"
     df = db_execute_fetch(query, dbName="tweets", rdf=True)
@@ -119,19 +96,7 @@ def selectByPolarity():
         return QueryByPolarity('polarity=0 Order by ' + filt)
 
 
-st.write(selectByPolarity())
-
-
-header("Visualization")
-"""
-3. **Display barchart for selected column** \n
-   Here I have created a bar chart for a selected column,
-   it will split each bar based on their polarity or subjectivity
-   and show them in different colors.
-"""
-
-
-def selectColumn(df):
+def selectColumn(df, ct):
     column = st.selectbox(
         "Select a column for a barchart", (["original_author",
                                             "screen_name",
@@ -154,20 +119,6 @@ def selectColumn(df):
                        x=column, y="counts", color="score", title=title)
     fig.update_layout(width=1200, height=600)
     st.plotly_chart(fig)
-
-
-df = loadData()
-df["score"] = df["polarity"].apply(ct.polarity_category)
-df["subjectivity_score"] = df["subjectivity"].apply(
-    ct.subjectivity_category)
-selectColumn(df)
-
-
-"""
-4. **Tweet Text Word Cloud** \n
-   Here I have created world cloud for, positive, negative, neutral tweets,
-   or all tweets
-"""
 
 
 def wordCloud(df):
@@ -199,17 +150,6 @@ def wordCloud(df):
     wc = WordCloud(width=1000, height=600, background_color='white', stopwords=STOP_WORDS).generate(
         ' '.join(df.original_text.values))
     st.image(wc.to_array())
-
-
-df = loadData()
-wordCloud(df)
-
-
-"""
-5. **Popularity of tweets** \n
-   Here we try to find if there is corelation between retweet_count, favorite_count,
-   followers_count, friends_count and polarity and subjectivity
-"""
 
 
 def pie(df, column):
@@ -254,32 +194,20 @@ def select_pie(df):
         return ([pie(df, "subjectivity_score"), corelation(df, "subjectivity_score")])
 
 
-df = loadData()
-df["score"] = df["polarity"].apply(ct.polarity_category)
-df["subjectivity_score"] = df["subjectivity"].apply(
-    ct.subjectivity_category)
-select_pie(df)
-
-
-"""
-6. **Polarity of tweets over time** \n
-   Here I try there is a trend over time in polarity and subjectivity of tweets and
-   and theme being liked
-"""
-
-
 def scatter(df):
     col1, col2, col3, col4 = st.beta_columns(4)
     color = col1.selectbox("Select column for color", ([
         "polarity",
         "subjectivity", ]), key=5)
     x = col2.selectbox("Select x axis", ([
+        "created_at",
         "retweet_count",
         "favorite_count",
         "followers_count",
         "friends_count", ]), key=6)
 
     y = col3.selectbox("Select column for y-axis", ([
+        "created_at",
         "retweet_count",
         "favorite_count",
         "followers_count",
@@ -297,28 +225,74 @@ def scatter(df):
     st.plotly_chart(fig)
 
 
-df = loadData()
-df["score"] = df["polarity"].apply(ct.polarity_category)
-df["subjectivity_score"] = df["subjectivity"].apply(
-    ct.subjectivity_category)
-scatter(df)
+def app():
+    ct = Clean_Tweets()
+    header("Database")
+    st.write(
+        """
+    1. **Query all tweets in database** \n
+    Here I have loaded the whole data from the database and 
+    Filtered the data using pandas.
+    """)
 
+    df = loadData()
+    hashtag = select_column_for_filter(df)
+    temp_df = df[np.isin(df, hashtag).any(axis=1)]
+    st.write(temp_df)
+    st.write(
+        """
+    2. **Query specific data** \n
+    Here I have written a query that selects specific tweets based on condition. 
+    It is good if the data is too large to load at once.
+    """)
+    st.write(selectByPolarity())
 
-"""
-7. **Parallel Categories Diagram** \n
-   Finally here I have created parallel categories diagram.
-"""
+    header("Visualization")
+    st.write(
+        """
+    3. **Display barchart for selected column** \n
+    Here I have created a bar chart for a selected column,
+    it will split each bar based on their polarity or subjectivity
+    and show them in different colors.
+    """)
 
-# Read in the cereal data
-df = loadData()
-df["score"] = df["polarity"].apply(ct.polarity_category)
-df["subjectivity_score"] = df["subjectivity"].apply(
-    ct.subjectivity_category)
-df = df.groupby(['device', 'place', 'score', "subjectivity_score", 'subjectivity', "favorite_count", "followers_count", "retweet_count"]
-                ).size().reset_index(name='counts')
+    df = loadData()
+    df["score"] = df["polarity"].apply(ct.polarity_category)
+    df["subjectivity_score"] = df["subjectivity"].apply(
+        ct.subjectivity_category)
+    selectColumn(df, ct)
 
-x = df.nlargest(25, "counts")
-fig = px.parallel_categories(x, dimensions=['device', 'place', "retweet_count", 'score', 'subjectivity_score'],
-                             color="subjectivity", color_continuous_scale=px.colors.sequential.Inferno)
-fig.update_layout(width=900, height=600)
-st.plotly_chart(fig)
+    st.write(
+        """
+    4. **Tweet Text Word Cloud** \n
+    Here I have created world cloud for, positive, negative, neutral tweets,
+    or all tweets
+    """)
+    df = loadData()
+    wordCloud(df)
+
+    st.write(
+        """
+    5. **Popularity of tweets** \n
+    Here we try to find if there is corelation between retweet_count, favorite_count,
+    followers_count, friends_count and polarity and subjectivity
+    """)
+
+    df = loadData()
+    df["score"] = df["polarity"].apply(ct.polarity_category)
+    df["subjectivity_score"] = df["subjectivity"].apply(
+        ct.subjectivity_category)
+    select_pie(df)
+
+    st.write(
+        """
+    6. **Trend over time** \n
+    Here I try there is a trend over time in polarity and subjectivity of tweets and
+    and theme being liked
+    """)
+
+    df = loadData()
+    df["score"] = df["polarity"].apply(ct.polarity_category)
+    df["subjectivity_score"] = df["subjectivity"].apply(
+        ct.subjectivity_category)
+    scatter(df)
