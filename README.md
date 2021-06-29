@@ -1,8 +1,5 @@
 # Twitter-Data-Analysis
 
-At the end this article, we will set up a system using Twitter data.
-
-
 **Table of content**
 
 - [Overview](##abstract)
@@ -16,7 +13,6 @@ At the end this article, we will set up a system using Twitter data.
   - [Travis CI](#travisCI)
   - [Dashboard](#dashboard)
 
-<a name="abstract"/>
 ## Overview
 Beginning from December 2019, the whole world is confronting an infectious disease called coronavirus. With restrictions on movement and stay-at-home orders in place, social media platforms such as Twitter have become the only means for users to keep in touch with one another and an outlet to express their concerns, opinions, and feelings about the pandemic. During these challenging times, people have used Twitter to appreciate frontline health workers and uplift each other through difficult times. On the other hand, Twitter has also been a place for massive misinformation and negative Tweets, creating unnecessary anxiety towards this disease.
 
@@ -31,9 +27,19 @@ cd Catch-Tweet-with-Keyword
 pip install -r requirements.txt
 ```
 ## Features
+
 ### Data Extraction
+  - There is a Json data that is collected using keywords `covide19` and `Africa` from twitter.
+  - There is a file called `extract_data_frame.py` which is used to extracts the data from data/covid19.json and construct a dataframe called `processed_tweet_data.csv`. 
+  - If there is no change to the data, `processed_tweet_data.csv`is already generated.
+
+
 ### Data Preprocessing
+
 ### Data Exploration and Visualzation
+
 ### Test
+
 ### Travis CI
+
 ### Dashboard
