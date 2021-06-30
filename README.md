@@ -29,17 +29,23 @@ pip install -r requirements.txt
 ## Features
 
 ### Data Extraction
-  - There is a Json data that is collected using keywords `covide19` and `Africa` from twitter.
-  - There is a file called `extract_data_frame.py` which is used to extracts the data from data/covid19.json and construct a dataframe called `processed_tweet_data.csv`. 
-  - If there is no change to the data, `processed_tweet_data.csv`is already generated.
+  - There are JSON data that is collected using keywords `covide19` and `Africa` from Twitter.
+  - There is a file called `extract_data_frame.py` which is used to extracts the data from data/covid19.json and construct a data frame called `processed_tweet_data.csv`. 
+  - If there is no change to the data, `processed_tweet_data.csv` is already generated.
 
 
 ### Data Preprocessing
+  - For data preprocessing the class Clean_Tweets which is in clean_tweets_dataframe.py is used. 
+  - The notebook for preprocessing is inside the notebooks folder in the file preprocessing.ipynb.
 
-### Data Exploration and Visualzation
+### Data Exploration and Visualization
+  - The notebook for Data Exploration and Visualization is inside the notebooks folder in the file preprocessing.ipynb.
 
 ### Test
+  - There are two tests inside the tests folder.
 
 ### Travis CI
+  - The file .travis.yml contains the configuration for Travis.
 
 ### Dashboard
+  - The code for the dashboard and database are inside MySQL and streamlit folder
