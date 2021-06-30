@@ -1,3 +1,4 @@
+from clean_tweets_dataframe import *
 import sys
 import os
 import numpy as np
@@ -13,7 +14,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 sys.path.append(os.path.abspath(os.path.join('..')))
-from clean_tweets_dataframe import *
 
 
 def loadData():

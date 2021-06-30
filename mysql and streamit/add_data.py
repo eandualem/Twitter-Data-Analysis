@@ -16,17 +16,24 @@ def DBConnect(dbName=None):
     -------
 
     """
-    conn = mysql.connect(host='localhost', user=os.getenv("USER"), password=os.getenv("PASSWORD"),
-                         database=dbName, buffered=True)
-    cur = conn.cursor()
-    return conn, cur
+    try:
+        conn = mysql.connect(host='localhost', user=os.getenv("USER"), password=os.getenv("PASSWORD"),
+                             database=dbName, buffered=True)
+        cur = conn.cursor()
+        return conn, cur
+    except mysql.connector.Error as err:
+        print("Database connection error: {}".format(err))
 
 
 def emojiDB(dbName: str) -> None:
-    conn, cur = DBConnect(dbName)
-    dbQuery = f"ALTER DATABASE {dbName} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;"
-    cur.execute(dbQuery)
-    conn.commit()
+
+    try:
+        conn, cur = DBConnect(dbName)
+        dbQuery = f"ALTER DATABASE {dbName} CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;"
+        cur.execute(dbQuery)
+        conn.commit()
+    except mysql.connector.Error as err:
+        print("Error : {}".format(err))
 
 
 def createDB(dbName: str) -> None:
@@ -45,10 +52,13 @@ def createDB(dbName: str) -> None:
     -------
 
     """
-    conn, cur = DBConnect()
-    cur.execute(f"CREATE DATABASE IF NOT EXISTS {dbName};")
-    conn.commit()
-    cur.close()
+    try:
+        conn, cur = DBConnect()
+        cur.execute(f"CREATE DATABASE IF NOT EXISTS {dbName};")
+        conn.commit()
+        cur.close()
+    except mysql.connector.Error as err:
+        print("Error : {}".format(err))
 
 
 def createTables(dbName: str) -> None:
